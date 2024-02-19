@@ -1,70 +1,154 @@
-# Getting Started with Create React App
+# Project Title
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+workZen
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+### Problem
 
-### `npm start`
+### User Profile
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Implementation
 
-### `npm test`
+### Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- React
+- MySQL
+- Express
+- Client libraries:
+  - react
+  - react-router
+  - axios
+- Server libraries:
+  - knex
+  - express
+  - bcrypt for password hashing
 
-### `npm run build`
+### APIs
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- No external APIs will be used for the first sprint
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Sitemap
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Mockups
 
-### `npm run eject`
+### Endpoints
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+**GET /**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Parameters:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Response:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+[
+    {
+    },
+    ...
+]
+```
 
-## Learn More
+**GET /:id**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Parameters:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Response:
 
-### Code Splitting
+```
+{
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+}
+```
 
-### Analyzing the Bundle Size
+**POST /:id/rating**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Parameters:
 
-### Making a Progressive Web App
+Response:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+{
 
-### Advanced Configuration
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+**PUT /:id/**
 
-### Deployment
+Parameters:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Response:
 
-### `npm run build` fails to minify
+```
+{
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+}
+```
+
+**POST /**
+
+- Add a user account
+
+Parameters:
+
+- email: User's email
+- password: User's provided password
+
+Response:
+
+```
+{
+    "token": ""
+}
+```
+
+**POST /user/login**
+
+- Login a user
+
+Parameters:
+
+- email: User's email
+- password: User's provided password
+
+Response:
+
+```
+{
+    "token": ""
+}
+```
+
+### Auth
+
+- JWT auth
+  - Before adding auth, all API requests will be using a fake user with id 1
+  - Added after core features have first been implemented
+  - Store JWT in localStorage, remove when a user logs out
+  - Add states for logged in showing different UI in places listed in mockups
+
+## Roadmap
+
+- Feature: Home page
+
+- Feature: Create account
+
+  - Implement register page + form
+  - Create POST /users/register endpoint
+
+- Feature: Login
+
+  - Implement login page + form
+  - Create POST /users/login endpoint
+
+- Feature: Implement JWT tokens
+
+  - Server: Update expected requests / responses on protected endpoints
+  - Client: Store JWT in local storage, include JWT on axios calls
+
+- Bug fixes
+
+- DEMO DAY
+
+## Nice-to-haves

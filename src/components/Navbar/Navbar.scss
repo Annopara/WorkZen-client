@@ -1,0 +1,45 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #d31ebe;
+
+  &__logo {
+    display: flex;
+    color: beige;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  &__img {
+    padding: 1rem;
+  }
+
+  &__dot {
+    width: 32px;
+  }
+
+  &__profile {
+    padding: 0.5rem 1rem;
+    background-color: beige;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    padding: 0.3rem;
+    margin-left: 0.5rem;
+  }
+
+  &__role {
+    font-size: 0.3rem;
+    font-weight: 300;
+    color: burlywood;
+  }
+}

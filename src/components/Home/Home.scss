@@ -1,0 +1,15 @@
+.home {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+
+  &__column {
+    display: flex;
+    margin-left: 1.5rem;
+    justify-content: space-between;
+  }
+}
+
+ul {
+  padding: 0;
+}

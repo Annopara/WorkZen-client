@@ -1,0 +1,14 @@
+.sidebar-container {
+  flex: 1;
+  padding: 16px;
+  display: none;
+  height: 100vh;
+
+  @media (min-width: 600px) {
+    display: block;
+  }
+}
+
+.fixed-container {
+  position: fixed;
+}

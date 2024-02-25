@@ -1,0 +1,37 @@
+.todo {
+  flex-grow: 1;
+  flex-basis: 300px;
+
+  .todo-list {
+    width: 80%;
+    list-style-type: none;
+    padding: 0;
+
+    li {
+      width: 100%;
+      margin-bottom: 16px;
+      background: var(--grey);
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .bx {
+        cursor: pointer;
+      }
+
+      &.completed {
+        border-left: 10px solid var(--blue);
+      }
+
+      &.not-completed {
+        border-left: 10px solid var(--orange);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

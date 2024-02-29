@@ -1,9 +1,28 @@
 import React from "react";
 import "./Navbar.scss";
 import { AccountCircle, Workspaces } from "@mui/icons-material";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const location = useLocation();
+
+  // Hardcoded user info for the login page
+  const loginUserInfo = {
+    name: "Guest",
+  };
+
+  // Dummy user info for the home page
+  const homeUserInfo = {
+    name: "Ann Charles",
+    role: "Administrator",
+  };
+
+  // Determine which user info to display based on the current location
+  const userInfo =
+    location.pathname === "/" || location.pathname === "/logout"
+      ? loginUserInfo
+      : homeUserInfo;
+
   return (
     <nav className='navbar'>
       <NavLink to='/' className='navbar__logo'>
@@ -17,8 +36,8 @@ const Navbar = () => {
           <AccountCircle />
         </div>
         <div className='navbar__info'>
-          <span className='navbar__user'>Ann Charles</span>
-          <span className='navbar__role'>Administrator</span>
+          <span className='navbar__user'>{userInfo.name}</span>
+          <span className='navbar__role'>{userInfo.role}</span>
         </div>
       </section>
     </nav>

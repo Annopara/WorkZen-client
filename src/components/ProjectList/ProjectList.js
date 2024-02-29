@@ -1,4 +1,6 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
@@ -14,58 +16,69 @@ import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-const events = [
-  {
-    order_id: 1,
-    event_name: "Birthday Party",
-    client_name: "Lois Pearson",
-    status: "Ongoing",
-    due_date: "2024-03-15",
-    location: "Central Park",
-    budget: "$1500",
-    invitees: 50,
-    notes: "Please ensure that the birthday cake is gluten-free.",
-    theme: "Under the Stars",
-    special_requirements:
-      "Wheelchair accessibility required for the event venue.",
-  },
-  {
-    order_id: 2,
-    event_name: "Wedding",
-    client_name: "John Doe",
-    status: "Completed",
-    due_date: "2024-04-20",
-    location: "Beach",
-    budget: "$5000",
-    invitees: 100,
-    notes: "Outdoor ceremony followed by indoor reception.",
-    theme: "Vintage",
-    special_requirements: "Vegetarian meal options required.",
-  },
-];
+const { REACT_APP_API_URL } = process.env;
 
 function Row({ event }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [staffs, setStaffs] = useState([]);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "green";
+      case "ongoing":
+        return "amber";
+      case "scheduled":
+        return "red";
+      default:
+        return "white";
+    }
+  };
+
+  // Function to convert timestamp to regular time format
+  const convertTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
+  useEffect(() => {
+    async function fetchStaffs() {
+      try {
+        const result = await axios.get(
+          `${REACT_APP_API_URL}/events/${event.event_id}/staffs`
+        ); // Updated endpoint to fetch staffs for the event
+        setStaffs(result.data);
+      } catch (error) {
+        console.error("Error fetching staffs:", error);
+      }
+    }
+
+    fetchStaffs();
+  }, [event]);
 
   return (
     <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+      <TableRow
+        sx={{
+          "& > *": { borderBottom: "unset", cursor: "pointer" },
+          backgroundColor: open ? "#f0f0f0" : "inherit",
+        }}
+        onClick={() => setOpen(!open)}
+        hover
+      >
         <TableCell>
-          <IconButton
-            aria-label='expand row'
-            size='small'
-            onClick={() => setOpen(!open)}
-          >
+          <IconButton aria-label='expand row' size='small'>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
         <TableCell component='th' scope='row'>
-          {event.order_id}
+          {event.event_id}
         </TableCell>
         <TableCell>{event.event_name}</TableCell>
         <TableCell>{event.client_name}</TableCell>
-        <TableCell>{event.status}</TableCell>
-        <TableCell>{event.due_date}</TableCell>
+        <TableCell style={{ backgroundColor: getStatusColor(event.status) }}>
+          {event.status}
+        </TableCell>
+        <TableCell>{convertTimestamp(event.due_date)}</TableCell>
         <TableCell>{event.location}</TableCell>
         <TableCell>{event.budget}</TableCell>
         <TableCell>{event.invitees}</TableCell>
@@ -91,6 +104,12 @@ function Row({ event }) {
                   <strong>Special Requirements:</strong>{" "}
                   {event.special_requirements}
                 </div>
+                <div>
+                  <strong>Staffs Assigned:</strong>{" "}
+                  {staffs.map((staff, index) => (
+                    <span key={index}>{staff.name}</span>
+                  ))}
+                </div>
               </Typography>
             </Box>
           </Collapse>
@@ -105,29 +124,88 @@ Row.propTypes = {
 };
 
 export default function CollapsibleTable() {
+  const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const { filter } = useParams();
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const result = await axios.get(REACT_APP_API_URL + "/events");
+        setEvents(result.data);
+        setFilteredEvents(result.data);
+      } catch (error) {
+        console.error("Form submission error", error);
+      }
+    }
+
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    let filtered = events;
+
+    if (searchQuery) {
+      filtered = filtered.filter((event) =>
+        String(event.event_id).toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((event) => event.status === filterStatus);
+    }
+
+    setFilteredEvents(filtered);
+  }, [events, searchQuery, filterStatus]);
+
+  useEffect(() => {
+    if (filter) {
+      setFilterStatus(filter);
+    }
+  }, [filter]);
+
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label='collapsible table'>
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Order ID</TableCell>
-            <TableCell>Event Name</TableCell>
-            <TableCell>Client Name</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Due Date</TableCell>
-            <TableCell>Location</TableCell>
-            <TableCell>Budget</TableCell>
-            <TableCell>Invitees</TableCell>
-            <TableCell align='right'>More Info</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {events.map((event, index) => (
-            <Row key={index} event={event} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <div>
+      <input
+        type='text'
+        placeholder='Search by ID...'
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+      >
+        <option value='all'>All</option>
+        <option value='completed'>Completed</option>
+        <option value='ongoing'>Ongoing</option>
+        <option value='scheduled'>Scheduled</option>
+      </select>
+      <TableContainer component={Paper}>
+        <Table aria-label='collapsible table'>
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>Order ID</TableCell>
+              <TableCell>Event Name</TableCell>
+              <TableCell>Client Name</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Due Date</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Budget</TableCell>
+              <TableCell>Invitees</TableCell>
+              <TableCell align='right'>More Info</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredEvents.map((event, index) => (
+              <Row key={index} event={event} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 }

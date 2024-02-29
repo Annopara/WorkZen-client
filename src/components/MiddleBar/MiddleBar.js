@@ -1,9 +1,10 @@
 import TableData from "../TableData/TableData";
+import TodoTable from "../TodoTable/TodoTable";
 import WidgetCard from "../WidgetCard/WidgetCard";
 import "./MiddleBar.scss";
 import { Paper } from "@mui/material";
 
-const MiddleBar = () => {
+const MiddleBar = ({ projectId }) => {
   return (
     <>
       <section className='middlebar'>
@@ -14,7 +15,8 @@ const MiddleBar = () => {
         {/*DataType */}
 
         <section className='middlebar__bottom'>
-          <TableData />
+          <TableData projectId={projectId} />
+          {/* <TodoTable /> */}
         </section>
       </section>
     </>

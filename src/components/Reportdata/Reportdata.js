@@ -1,48 +1,62 @@
 import * as React from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
-
-const events = [
-  {
-    event_name: "Birthday Party",
-    client_name: "John Smith",
-    status: "Ongoing",
-    due_date: "2024-03-15",
-    location: "123 Main Street, Cityville",
-    budget: 1500,
-    attendance: 50,
-  },
-
-  {
-    event_name: "Birthday Party",
-    client_name: "John Smith",
-    status: "Ongoing",
-    due_date: "2024-03-15",
-    location: "123 Main Street, Cityville",
-    budget: 1500,
-    attendance: 50,
-  },
-
-  {
-    event_name: "Birthday Party",
-    client_name: "John Smith",
-    status: "Ongoing",
-    due_date: "2024-03-15",
-    location: "123 Main Street, Cityville",
-    budget: 1500,
-    attendance: 50,
-  },
-  // Add other objects here
-];
+import axios from "axios";
 
 function ChartsOverviewDemo() {
-  // Calculate total budget
-  const totalBudget = events.reduce((total, event) => total + event.budget, 0);
+  const [events, setEvents] = React.useState([]);
 
-  // Divide total budget into three quarters
-  const quarter = totalBudget / 3;
+  React.useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/events`
+        );
+        setEvents(response.data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  // Ensure events have been fetched before rendering the chart
+  if (events.length === 0) return null;
+
+  // Sort events by due_date
+  events.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+
+  // Divide events into quarters
+  const firstQuarterEvents = events.filter(
+    (event) => new Date(event.due_date).getMonth() < 3
+  );
+  const secondQuarterEvents = events.filter(
+    (event) =>
+      new Date(event.due_date).getMonth() >= 3 &&
+      new Date(event.due_date).getMonth() < 6
+  );
+  const thirdQuarterEvents = events.filter(
+    (event) =>
+      new Date(event.due_date).getMonth() >= 6 &&
+      new Date(event.due_date).getMonth() < 9
+  );
+
+  // Calculate total budget for each quarter
+  const firstQuarterBudget = firstQuarterEvents.reduce(
+    (total, event) => total + parseFloat(event.budget),
+    0
+  );
+  const secondQuarterBudget = secondQuarterEvents.reduce(
+    (total, event) => total + parseFloat(event.budget),
+    0
+  );
+  const thirdQuarterBudget = thirdQuarterEvents.reduce(
+    (total, event) => total + parseFloat(event.budget),
+    0
+  );
 
   // Prepare data for the bar chart
-  const data = [quarter, quarter, quarter];
+  const data = [firstQuarterBudget, secondQuarterBudget, thirdQuarterBudget];
 
   // Define background colors for each quarter
   const bgColors = ["#FFCDD2", "#C5E1A5", "#81D4FA"];

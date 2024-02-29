@@ -18,7 +18,7 @@ function Sidebar() {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    const paths = ["/", "/projects", "/reports", "/logout"];
+    const paths = ["/home", "/projects", "/reports", "/logout"];
     const index = paths.findIndex((path) => path === location.pathname);
     setSelectedIndex(index !== -1 ? index : 0);
   }, [location]);
@@ -49,7 +49,7 @@ function Sidebar() {
           selected={selectedIndex === 0}
           onClick={() => handleListItemClick(0)}
           component={NavLink}
-          to='/'
+          to='/home'
         >
           <ListItemIcon>
             <Home />

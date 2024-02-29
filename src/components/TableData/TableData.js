@@ -12,7 +12,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Modal from "@mui/material/Modal";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -26,121 +29,217 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
+  backgroundColor: theme.palette.background.default,
+  "&:hover": {
     backgroundColor: theme.palette.action.hover,
-  },
-  "&:last-child td, &:last-child th": {
-    border: 0,
   },
 }));
 
-export default function CustomizedTables() {
-  const [rows, setRows] = React.useState([
-    {
-      order_id: 1,
-      client_name: "Lois Pearson",
-      event_name: "Birthday Party",
-      date_created: "2024-02-20",
-      due_date: "2024-03-20",
-      location: "Central Park",
-      budget: "$1500",
-      invitees: 50,
-      status: "Ongoing",
-    },
-    {
-      order_id: 2,
-      client_name: "John Doe",
-      event_name: "Wedding",
-      date_created: "2024-02-21",
-      due_date: "2024-03-21",
-      location: "Beach",
-      budget: "$2000",
-      invitees: 100,
-      status: "Completed",
-    },
-    {
-      order_id: 3,
-      client_name: "Jane Smith",
-      event_name: "Conference",
-      date_created: "2024-02-22",
-      due_date: "2024-03-22",
-      location: "Convention Center",
-      budget: "$3000",
-      invitees: 200,
-      status: "Not Started",
-    },
-  ]);
+const assignStaff = async (projectId, staffName) => {
+  try {
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/events/${projectId}/staff_name`,
+      { staffName }
+    );
+    alert(`Task has been assigned to ${staffName} successfully.`);
+  } catch (error) {
+    console.error("Error assigning staff:", error);
+    alert("Error assigning staff. Please try again later.");
+  }
+};
 
+export default function CustomizedTables({ projectId }) {
+  const [rows, setRows] = React.useState([]);
   const [showAll, setShowAll] = React.useState(false);
+  const [selectedProject, setSelectedProject] = React.useState(null);
+  const [newTask, setNewTask] = React.useState("");
+  const [selectedStaff, setSelectedStaff] = React.useState("");
+
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/events`
+        );
+        const filteredProjects = response.data
+          .filter(
+            (project) => project.status === "Ongoing" && !project.staffName
+          )
+          .slice(0, 3);
+        setRows(filteredProjects);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const handleSeeMore = () => {
     setShowAll(true);
   };
 
-  const handleStatusChange = (index, newStatus) => {
-    const newRows = [...rows];
-    newRows[index].status = newStatus;
-    setRows(newRows);
+  const handleStatusChange = async (projectId, newStatus) => {
+    try {
+      await axios.put(`${process.env.REACT_APP_API_URL}/events/${projectId}`, {
+        status: newStatus,
+      });
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.projectId === projectId ? { ...row, status: newStatus } : row
+        )
+      );
+    } catch (error) {
+      console.error("Error updating project status:", error);
+      alert("Error updating project status. Please try again later.");
+    }
+  };
+
+  const handleAssignStaff = async () => {
+    if (!selectedStaff) {
+      alert("Please select a staff member.");
+      return;
+    }
+    if (!newTask) {
+      alert("Please provide a task description.");
+      return;
+    }
+
+    await assignStaff(selectedProject.projectId, selectedStaff);
+    setSelectedProject(null);
+    setNewTask("");
+    setSelectedStaff("");
+    fetchProjects();
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/events`
+      );
+      const filteredProjects = response.data
+        .filter((project) => project.status === "Ongoing" && !project.staffName)
+        .slice(0, 3);
+      setRows(filteredProjects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
   };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{ padding: "2rem", margin: "0 2rem", width: "87%" }}
-    >
-      <Typography variant='h5' gutterBottom>
-        Recent Projects
-      </Typography>
-      <Table sx={{ minWidth: 700 }} aria-label='customized table'>
-        <TableHead sx={{ backgroundColor: "#800080" }}>
-          <TableRow>
-            <StyledTableCell>Order ID</StyledTableCell>
-            <StyledTableCell>Client Name</StyledTableCell>
-            <StyledTableCell>Event Name</StyledTableCell>
-            <StyledTableCell>Date Created</StyledTableCell>
-            <StyledTableCell>Due Date</StyledTableCell>
-            <StyledTableCell>Location</StyledTableCell>
-            <StyledTableCell>Budget</StyledTableCell>
-            <StyledTableCell>Invitees</StyledTableCell>
-            <StyledTableCell>Status</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.slice(0, showAll ? rows.length : 3).map((row, index) => (
-            <StyledTableRow key={index}>
-              <StyledTableCell>{row.order_id}</StyledTableCell>
-              <StyledTableCell>{row.client_name}</StyledTableCell>
-              <StyledTableCell>{row.event_name}</StyledTableCell>
-              <StyledTableCell>{row.date_created}</StyledTableCell>
-              <StyledTableCell>{row.due_date}</StyledTableCell>
-              <StyledTableCell>{row.location}</StyledTableCell>
-              <StyledTableCell>{row.budget}</StyledTableCell>
-              <StyledTableCell>{row.invitees}</StyledTableCell>
-              <StyledTableCell>
-                <FormControl>
-                  <Select
-                    value={row.status}
-                    onChange={(e) => handleStatusChange(index, e.target.value)}
-                  >
-                    <MenuItem value='Not Started' style={{ color: "red" }}>
-                      Not Started
-                    </MenuItem>
-                    <MenuItem value='Ongoing' style={{ color: "amber" }}>
-                      Ongoing
-                    </MenuItem>
-                    <MenuItem value='Completed' style={{ color: "green" }}>
-                      Completed
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Link to='/projects'>
-        {!showAll && <Button onClick={handleSeeMore}>See More</Button>}
-      </Link>
-    </TableContainer>
+    <React.Fragment>
+      <TableContainer
+        component={Paper}
+        sx={{ padding: "2rem", margin: "0 2rem", width: "87%" }}
+      >
+        <Typography variant='h5' gutterBottom>
+          Recent Projects
+        </Typography>
+        <Table sx={{ minWidth: 700 }} aria-label='customized table'>
+          <TableHead sx={{ backgroundColor: "#800080" }}>
+            <TableRow>
+              <StyledTableCell>Order ID</StyledTableCell>
+              <StyledTableCell>Client Name</StyledTableCell>
+              <StyledTableCell>Event Name</StyledTableCell>
+              <StyledTableCell>Theme</StyledTableCell>
+              <StyledTableCell>Due Date</StyledTableCell>
+              <StyledTableCell>Location</StyledTableCell>
+              <StyledTableCell>Budget</StyledTableCell>
+              <StyledTableCell>Invitees</StyledTableCell>
+              <StyledTableCell>Status</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.slice(0, showAll ? rows.length : 3).map((row, index) => (
+              <StyledTableRow
+                key={index}
+                onClick={() => setSelectedProject(row)}
+              >
+                <StyledTableCell>{row.event_id}</StyledTableCell>
+                <StyledTableCell>{row.client_name}</StyledTableCell>
+                <StyledTableCell>{row.event_name}</StyledTableCell>
+                <StyledTableCell>{row.theme}</StyledTableCell>
+                <StyledTableCell>
+                  {new Date(row.due_date).toLocaleDateString()}
+                </StyledTableCell>
+                <StyledTableCell>{row.location}</StyledTableCell>
+                <StyledTableCell>{row.budget}</StyledTableCell>
+                <StyledTableCell>{row.invitees}</StyledTableCell>
+                <StyledTableCell>
+                  <FormControl>
+                    <Select
+                      value={row.status}
+                      onChange={(e) =>
+                        handleStatusChange(projectId, e.target.value)
+                      }
+                    >
+                      <MenuItem value='Not Started' style={{ color: "red" }}>
+                        Not Started
+                      </MenuItem>
+                      <MenuItem value='Ongoing' style={{ color: "amber" }}>
+                        Ongoing
+                      </MenuItem>
+                      <MenuItem value='Completed' style={{ color: "green" }}>
+                        Completed
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <Link to='/projects'>
+          {!showAll && (
+            <Button sx={{ color: "#800080" }} onClick={handleSeeMore}>
+              See More
+            </Button>
+          )}
+        </Link>
+      </TableContainer>
+      {selectedProject && (
+        <Modal
+          open={selectedProject !== null}
+          onClose={() => setSelectedProject(null)}
+          aria-labelledby='modal-modal-title'
+          aria-describedby='modal-modal-description'
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Paper sx={{ width: 400, p: 4 }}>
+            <Typography variant='h6' gutterBottom>
+              Assign Task to {selectedProject.event_name}
+            </Typography>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <Select
+                value={selectedStaff}
+                onChange={(e) => setSelectedStaff(e.target.value)}
+              >
+                <MenuItem value='John'>John</MenuItem>
+                <MenuItem value='Jane'>Jane</MenuItem>
+                <MenuItem value='Doe'>Doe</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label='Task Description'
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <Button
+              variant='contained'
+              sx={{ backgroundColor: "#800080", color: "white" }}
+              onClick={handleAssignStaff}
+            >
+              Assign
+            </Button>
+          </Paper>
+        </Modal>
+      )}
+    </React.Fragment>
   );
 }
